@@ -37,7 +37,6 @@ const cartReducer = (state = initialState, action) => {
             const existItems = [...state.cartItems]
             const existIndex = existItems.findIndex(cartItem => cartItem.id === payload.id)
             const updatedItems = [...existItems]
-            console.log('existIndex : ', existIndex)
             if (existIndex !== -1) {
                 updatedItems[existIndex] = {
                     ...updatedItems[existIndex],

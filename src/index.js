@@ -10,7 +10,7 @@ ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
       <PersistGate persistor={persistor}>
-      <App />
+        <App />
       </PersistGate>
     </Provider>
   </React.StrictMode>,

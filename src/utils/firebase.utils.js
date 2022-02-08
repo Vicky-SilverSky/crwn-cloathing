@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { getFirestore, getDoc, doc, setDoc } from "firebase/firestore";
+import { getFirestore, getDoc, doc, setDoc, collection, addDoc } from "firebase/firestore";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -31,7 +31,7 @@ provider.setCustomParameters({
 
 export const googleSignin = () => signInWithPopup(getAuth(), provider)
 
-export const getDb = () => getFirestore()
+export const db = getFirestore()
 
 export const createUserDocument = async (userData) => {
   try {
@@ -39,10 +39,47 @@ export const createUserDocument = async (userData) => {
     const userDocRef = doc(getFirestore(), `users/${uid}`)
     const docRef = await getDoc(userDocRef)
     if (!docRef.exists()) {
-      await setDoc(doc(getDb(), "users", uid), userData);
+      await setDoc(doc(db, "users", uid), userData);
       console.log("Document written with ID: ", docRef.id);
     }
   } catch (e) {
     console.error("Error adding document: ", e);
   }
+}
+
+export const createCollectionWithDataObj = async (collectionKey, dataObj) => {
+  const arrayData = []
+  Object.keys(dataObj).forEach(async key => {
+    const { title, items } = dataObj[key]
+    arrayData.push({ title, items })
+  })
+  let i = 0;
+  for await (const obj of arrayData) {
+    console.log(i)
+    i += 1;
+    addDoc(collection(db, collectionKey), obj)
+  }
+  console.log('finish with ', i)
+}
+
+export const convertCollectionsSnapshotToMap = (snapshot) => {
+  const transformedCollections = snapshot.docs.map(doc => {
+    const { title, items } = doc.data()
+    return {
+      id: doc.id,
+      title,
+      items,
+      routeName: encodeURI(String(title).toLowerCase())
+    }
+  })
+
+  return transformedCollections
+}
+
+export const mapCollectionValueToHashTable = (collections) => {
+  const mappedVal = collections.reduce((accumulator, collection) => {
+    accumulator[collection.title.toLowerCase()] = collection
+    return accumulator
+  }, {})
+  return mappedVal
 }
